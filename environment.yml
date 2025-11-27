@@ -17,3 +17,5 @@ dependencies:
     - pydantic-settings
     - pgvector
     - ollama
+    - httpx
+    - beautifulsoup4
