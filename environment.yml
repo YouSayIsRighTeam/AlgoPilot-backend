@@ -1,0 +1,19 @@
+name: algopilot-backend
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - postgresql
+  - pip
+  - pip:
+    - fastapi
+    - uvicorn
+    - sqlalchemy
+    - alembic
+    - asyncpg
+    - psycopg2-binary
+    - celery[rabbitmq]
+    - pydantic-settings
+    - pgvector
+    - ollama
