@@ -10,3 +10,5 @@ pgvector
 ollama
 httpx
 beautifulsoup4
+openai
+requests
