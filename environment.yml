@@ -21,3 +21,4 @@ dependencies:
     - beautifulsoup4
     - openai
     - requests
+    - redis
