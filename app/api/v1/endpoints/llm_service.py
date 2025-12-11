@@ -10,7 +10,7 @@ router = APIRouter()
 class LLMRequest(BaseModel):
     prompt: str
     max_tokens: int = 1000
-    temperature: float = 0.8
+    temperature: float = 0.3
     return_json: bool = False
 
 class LLMResponse(BaseModel):

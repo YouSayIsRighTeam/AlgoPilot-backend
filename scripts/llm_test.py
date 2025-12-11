@@ -37,7 +37,7 @@ try:
         model=model_name,
         prompt=message,
         max_tokens=1000,
-        temperature=0.8
+        temperature=0.3
     )
     
     
