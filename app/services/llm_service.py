@@ -3,6 +3,7 @@ import json
 from openai import AsyncOpenAI, APIConnectionError
 from app.core.config import settings
 from typing import Optional
+import datetime
 
 class LLMService:
     def __init__(self):
@@ -27,6 +28,7 @@ class LLMService:
     async def generate_text(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.3, return_json: bool = True) -> str:
         await self._ensure_model_id()
         try:
+            timestamp = datetime.datetime.now().isoformat()
             response = await self.client.chat.completions.create(
                 model=self.model_id,
                 messages=[
@@ -35,6 +37,7 @@ class LLMService:
                         "content": (
                             "Output the final answer only. Do NOT output any explanations or additional text."
                             "Thank you"
+                            f"{timestamp}"
                         )
                     },
                     {"role": "user", "content": prompt},
