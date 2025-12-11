@@ -26,14 +26,35 @@ class LLMService:
     async def generate_text(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.8) -> str:
         await self._ensure_model_id()
         try:
-            response = await self.client.completions.create(
+            response = await self.client.chat.completions.create(
                 model=self.model_id,
-                prompt=prompt,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "Output the final answer only. Do NOT output any explanations or additional text."
+                            "Thank you"
+                        )
+                    },
+                    {"role": "user", "content": prompt},
+                ],
                 max_tokens=max_tokens,
-                temperature=temperature
+                temperature=temperature,
             )
             
-            return response.choices[0].text.strip()
+            raw = response.choices[0].message.content.strip()
+            # Extract only the final answer after "final"
+            if "final" in raw.lower():
+                # Split by "final" and take the last part
+                final_answer = raw.split("final")[-1].strip()
+                # Remove any trailing punctuation
+                final_answer = final_answer.rstrip('.')
+                print("=== Final Answer ===")
+                print(final_answer)
+                raw = final_answer
+            else:
+                raw = raw.strip()
+            return raw
             
         except APIConnectionError as e:
             return f"Error connecting to LLM: {str(e)}"
