@@ -11,6 +11,7 @@ class LLMRequest(BaseModel):
     prompt: str
     max_tokens: int = 1000
     temperature: float = 0.8
+    return_json: bool = False
 
 class LLMResponse(BaseModel):
     generated_text: str
@@ -24,7 +25,8 @@ async def generate_text_async(request: LLMRequest):
     task = generate_text_task.delay(
         prompt=request.prompt,
         max_tokens=request.max_tokens,
-        temperature=request.temperature
+        temperature=request.temperature,
+        return_json=request.return_json
     )
     
     return {
@@ -55,7 +57,7 @@ async def get_task_result(task_id: str):
     
     return response
 
-@router.post("/generate", response_model=LLMResponse)
+@router.post("/generate")
 async def generate_text(request: LLMRequest):
     """
     call LLM with prompt
@@ -63,7 +65,8 @@ async def generate_text(request: LLMRequest):
     result = await llm_service.generate_text(
         prompt=request.prompt,
         max_tokens=request.max_tokens,
-        temperature=request.temperature
+        temperature=request.temperature,
+        return_json=request.return_json
     )
     
     if result.startswith("Error"):

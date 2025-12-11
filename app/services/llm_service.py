@@ -1,4 +1,5 @@
 # app/services/llm_service.py
+import json
 from openai import AsyncOpenAI, APIConnectionError
 from app.core.config import settings
 from typing import Optional
@@ -23,7 +24,7 @@ class LLMService:
         except Exception as e:
             print(f"Failed to fetch models from vLLM: {e}")
             pass
-    async def generate_text(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.8) -> str:
+    async def generate_text(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.8, return_json: bool = True) -> str:
         await self._ensure_model_id()
         try:
             response = await self.client.chat.completions.create(
@@ -44,9 +45,9 @@ class LLMService:
             
             raw = response.choices[0].message.content.strip()
             # Extract only the final answer after "final"
-            if "final" in raw.lower():
+            if "assistantfinal" in raw.lower():
                 # Split by "final" and take the last part
-                final_answer = raw.split("final")[-1].strip()
+                final_answer = raw.split("assistantfinal")[-1].strip()
                 # Remove any trailing punctuation
                 final_answer = final_answer.rstrip('.')
                 print("=== Final Answer ===")
