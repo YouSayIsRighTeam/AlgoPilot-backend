@@ -1,11 +1,17 @@
 # app/api/v1/endpoints/llm.py
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends, Header
 from pydantic import BaseModel
 from app.services.llm_service import llm_service
 from celery.result import AsyncResult
 from app.worker.tasks import generate_text_task
 
 router = APIRouter()
+
+API_KEY = "tj06g/ wj/3"
+
+async def verify_api_key(x_api_key: str = Header(...)):
+    if x_api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API Key")
 
 class LLMRequest(BaseModel):
     prompt: str
@@ -17,7 +23,7 @@ class LLMResponse(BaseModel):
     generated_text: str
     used_model: str
 
-@router.post("/generate-async")
+@router.post("/generate-async", dependencies=[Depends(verify_api_key)])
 async def generate_text_async(request: LLMRequest):
     """
     Put LLM request to queue (Retuen: task's ID)
@@ -57,7 +63,7 @@ async def get_task_result(task_id: str):
     
     return response
 
-@router.post("/generate")
+@router.post("/generate", dependencies=[Depends(verify_api_key)])
 async def generate_text(request: LLMRequest):
     """
     call LLM with prompt
