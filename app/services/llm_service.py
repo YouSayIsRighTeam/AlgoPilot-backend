@@ -4,6 +4,7 @@ from openai import AsyncOpenAI, APIConnectionError
 from app.core.config import settings
 from typing import Optional
 import datetime
+import requests
 
 class LLMService:
     def __init__(self):
@@ -26,38 +27,30 @@ class LLMService:
             print(f"Failed to fetch models from vLLM: {e}")
             pass
     async def generate_text(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.3, return_json: bool = True) -> str:
-        await self._ensure_model_id()
-        try:
-            timestamp = datetime.datetime.now().isoformat()
-            response = await self.client.chat.completions.create(
-                model=self.model_id,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": (
-                            "Output the final answer only. Do NOT output any explanations or additional text."
-                            "Thank you"
-                            f"{timestamp}"
-                        )
-                    },
-                    {"role": "user", "content": prompt},
-                ],
-                max_tokens=max_tokens,
-                temperature=temperature,
-            )
-            
-            raw = response.choices[0].message.content.strip()
-            if "assistantfinal" in raw.lower():
-                final_answer = raw.split("assistantfinal")[-1].strip()
-                raw = final_answer
-            else:
-                raw = raw.strip()
+        url = "http://ollma.coltengroup.org/api/chat"
+        payload = {
+            "model": "gpt-oss:120b-cloud",  
+            "messages": [
+                {"role": "user", "content": prompt}
+            ],
+            "stream": False 
+        }
 
-            print("=== Response ===")
-            print(raw)
-            return raw
-        except Exception as e:
-            print(f"LLM Generation Error: {e}")
-            return f"An error occurred: {str(e)}"
+        try:
+            response = requests.post(url, json=payload)
+
+            if response.status_code == 200:
+                response_data = response.json()
+
+                print("response:", response_data['message']['content'])
+                return response_data['message']['content']
+            else:
+                print(f"Error: {response.status_code}")
+                print(response.text)
+                return response.text
+
+        except requests.exceptions.ConnectionError:
+            print("Error")
+            return "error"
 
 llm_service = LLMService()

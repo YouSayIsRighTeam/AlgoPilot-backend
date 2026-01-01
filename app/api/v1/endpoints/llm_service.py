@@ -7,7 +7,7 @@ from app.worker.tasks import generate_text_task
 
 router = APIRouter()
 
-API_KEY = "tj06g/ wj/3"
+API_KEY = "ouo"
 
 async def verify_api_key(x_api_key: str = Header(...)):
     if x_api_key != API_KEY:
@@ -63,22 +63,15 @@ async def get_task_result(task_id: str):
     
     return response
 
-@router.post("/generate", dependencies=[Depends(verify_api_key)])
+@router.post("/generate")
 async def generate_text(request: LLMRequest):
     """
     call LLM with prompt
     """
-    result = await llm_service.generate_text(
-        prompt=request.prompt,
-        max_tokens=request.max_tokens,
-        temperature=request.temperature,
-        return_json=request.return_json
-    )
-    
-    if result.startswith("Error"):
-        raise HTTPException(status_code=503, detail=result)
+    result = await llm_service.generate_text(prompt=request.prompt)
+
+    print("result:", result)
 
     return {
-        "generated_text": result,
-        "used_model": llm_service.model_id
+        "generated_text": result
     }
